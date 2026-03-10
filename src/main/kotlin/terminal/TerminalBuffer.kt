@@ -83,4 +83,41 @@ class TerminalBuffer(
             scrollback.removeFirst()
         }
     }
+
+    private fun scrollUp(lines: Int = 1) {
+        require(lines >= 0)
+
+        repeat(lines) {
+            val removed = screen.removeAt(0)
+
+            pushLineToScrollback(removed)
+
+            screen.add(Line.blank(width))
+        }
+    }
+
+    private fun newline() {
+        if (cursorRow < height - 1) {
+            cursorRow++
+        } else {
+            scrollUp(1)
+        }
+    }
+
+    private fun advanceCursor() {
+        if (cursorCol < width - 1) {
+            cursorCol++
+        } else {
+            cursorCol = 0
+            newline()
+        }
+    }
+
+    private fun putCharOverwrite(ch: Char) {
+        val line = screen[cursorRow]
+
+        line.setCell(cursorCol, Cell(ch, currentAttributes))
+
+        advanceCursor()
+    }
 }
